@@ -12,10 +12,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "generate:sample": "tsx scripts/generate-sample.ts",
+    "generate:investigate": "tsx scripts/generate-investigate.ts",
     "verify:sample": "tsx scripts/verify-sample.ts",
+    "verify:investigate": "tsx scripts/verify-investigate.ts",
     "start": "npm run build && vite preview --host 0.0.0.0 --port 4173",
     "serve": "vite preview --host 0.0.0.0 --port 4173",
-    "verify": "tsc --noEmit && vitest run && tsx scripts/verify-sample.ts"
+    "verify": "tsc --noEmit && vitest run && tsx scripts/verify-sample.ts && tsx scripts/verify-investigate.ts"
   },
   "dependencies": {
     "idb": "^8.0.4",

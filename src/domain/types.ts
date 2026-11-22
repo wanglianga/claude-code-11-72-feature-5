@@ -152,7 +152,12 @@ export type FileKind =
   | 'CALIBRATION_REGISTER'
   | 'STATE_LOG'
   | 'READINGS'
-  | 'LATE_BATCH';
+  | 'LATE_BATCH'
+  | 'SOURCE_REGISTRY'
+  | 'RAINFALL'
+  | 'PUMP_SWITCH'
+  | 'SELF_REPORT'
+  | 'EVENT_PROFILE';
 
 export interface IntakeFile {
   fileId: string;

@@ -1,0 +1,4 @@
+source_id,kind,name,version,trust_level,registered_at,supersedes,sewer_id,chainage_m,travel_min_s,travel_max_s,allowed_kind,allowed_from,allowed_to,rain_threshold_mmh,env_nh3n_lo,env_nh3n_hi,env_cod_lo,env_cod_hi,env_cond_lo,env_cond_hi,env_ph_lo,env_ph_hi,flow_lo_m3h,flow_hi_m3h,revoked,note
+SRC-A,INDUSTRIAL_BRANCH,宏成化工工业支管,1,B,2026-11-19T09:00:00+08:00,,SW-IND-01,1850,360,600,DAILY,06:00,22:00,,3,8,4,16,60,240,-0.2,0.3,25,45,false,化工园支管，历史联合监测率定包络；允许 06:00–22:00 排放。
+SRC-B,CSO_OVERFLOW,城西雨污合流溢流口,1,B,2026-11-19T09:00:00+08:00,,SW-CSO-07,950,300,540,RAIN_TRIGGERED,,,18,2,6.5,10,45,,,-0.5,-0.05,300,600,false,合流制溢流口，雨强 ≥18 mm/h 触发；未登记电导率包络（缺测）。
+SRC-C,PLANT_RECYCLE,厂内反硝化回流,1,A,2026-11-19T09:00:00+08:00,,SW-REC-01,120,60,120,PUMP_RUNNING,,,,0.5,1.5,1,5,-50,10,0.05,0.25,80,120,false,厂内回流，仅回流泵运行时水力连通。

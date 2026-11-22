@@ -1,0 +1,2 @@
+switch_id,station_id,station_name,at,from_mode,to_mode,affects_sewer_id,travel_after_min_s,travel_after_max_s,version,trust_level,revoked,note
+PSW-1,PS-2,城西提升泵站,2026-11-20T14:10:00+08:00,直排,截流,SW-CSO-07,840,1320,1,A,false,暴雨调度：14:10 由直排切换为截流，SW-CSO-07 传播时间变长

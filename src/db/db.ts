@@ -24,6 +24,13 @@ import type {
   RecalcCandidate,
   StatePeriod,
 } from '../domain/types';
+import type {
+  CandidateAssessment,
+  Delivery,
+  Investigation,
+  InvestigationRegistry,
+  OutfallEvent,
+} from '../investigate/types';
 
 export interface AuditEntry {
   auditId: string;
@@ -32,6 +39,13 @@ export interface AuditEntry {
   action: string;
   detail: string;
   refIds: string[];
+}
+
+/** 登记簿记录包装：kind 区分记录类型，recordId 含版本（如 SRC-B@v1、SR-A-v2） */
+export interface RegistryRecordWrapper {
+  recordId: string;
+  kind: 'SOURCE' | 'RAINFALL' | 'PUMP_SWITCH' | 'SELF_REPORT' | 'EVENT_PROFILE';
+  record: unknown;
 }
 
 interface StoreSchema extends DBSchema {
@@ -51,14 +65,20 @@ interface StoreSchema extends DBSchema {
   declarations: { key: string; value: Declaration; indexes: { 'by-point-day': string } };
   recalc: { key: string; value: RecalcCandidate; indexes: { 'by-declaration': string; 'by-point-day': string } };
   audits: { key: string; value: AuditEntry };
+  invRegistry: { key: string; value: RegistryRecordWrapper; indexes: { 'by-kind': string } };
+  invEvents: { key: string; value: OutfallEvent };
+  invCandidates: { key: string; value: CandidateAssessment; indexes: { 'by-event': string } };
+  invInvestigations: { key: string; value: Investigation; indexes: { 'by-event': string } };
+  invDeliveries: { key: string; value: Delivery; indexes: { 'by-event': string } };
 }
 
 type FileKind = IntakeFile['kind'];
 
 export const DB_NAME = 'outfall-review';
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 export const SCHEMA_KEY = 'schemaVersion';
 export const SAMPLE_KEY = 'sampleImported';
+export const INVESTIGATE_KEY = 'investigateImported';
 
 export type ReviewDB = IDBPDatabase<StoreSchema>;
 
@@ -67,31 +87,45 @@ let dbPromise: Promise<ReviewDB> | null = null;
 export function getDb(): Promise<ReviewDB> {
   if (!dbPromise) {
     dbPromise = openDB<StoreSchema>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        db.createObjectStore('meta');
-        const intake = db.createObjectStore('intake', { keyPath: 'fileId' });
-        intake.createIndex('by-kind', 'kind');
-        db.createObjectStore('plants', { keyPath: 'plantId' });
-        const points = db.createObjectStore('points', { keyPath: 'pointCode' });
-        points.createIndex('by-plant', 'plantId');
-        const instruments = db.createObjectStore('instruments', { keyPath: 'instrumentId' });
-        instruments.createIndex('by-point', 'pointCode');
-        const calibrations = db.createObjectStore('calibrations', { keyPath: 'calibrationId' });
-        calibrations.createIndex('by-instrument', 'instrumentId');
-        const states = db.createObjectStore('states', { keyPath: 'stateId' });
-        states.createIndex('by-instrument', 'instrumentId');
-        const bindings = db.createObjectStore('bindings', { keyPath: 'bindingId' });
-        bindings.createIndex('by-point', 'pointCode');
-        const readings = db.createObjectStore('readings', { keyPath: 'readingId' });
-        readings.createIndex('by-point-day', 'dayKey');
-        readings.createIndex('by-instrument', 'instrumentId');
-        readings.createIndex('by-file', 'sourceFileId');
-        const declarations = db.createObjectStore('declarations', { keyPath: 'declarationId' });
-        declarations.createIndex('by-point-day', 'day');
-        const recalc = db.createObjectStore('recalc', { keyPath: 'candidateId' });
-        recalc.createIndex('by-declaration', 'declarationId');
-        recalc.createIndex('by-point-day', 'day');
-        db.createObjectStore('audits', { keyPath: 'auditId' });
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          db.createObjectStore('meta');
+          const intake = db.createObjectStore('intake', { keyPath: 'fileId' });
+          intake.createIndex('by-kind', 'kind');
+          db.createObjectStore('plants', { keyPath: 'plantId' });
+          const points = db.createObjectStore('points', { keyPath: 'pointCode' });
+          points.createIndex('by-plant', 'plantId');
+          const instruments = db.createObjectStore('instruments', { keyPath: 'instrumentId' });
+          instruments.createIndex('by-point', 'pointCode');
+          const calibrations = db.createObjectStore('calibrations', { keyPath: 'calibrationId' });
+          calibrations.createIndex('by-instrument', 'instrumentId');
+          const states = db.createObjectStore('states', { keyPath: 'stateId' });
+          states.createIndex('by-instrument', 'instrumentId');
+          const bindings = db.createObjectStore('bindings', { keyPath: 'bindingId' });
+          bindings.createIndex('by-point', 'pointCode');
+          const readings = db.createObjectStore('readings', { keyPath: 'readingId' });
+          readings.createIndex('by-point-day', 'dayKey');
+          readings.createIndex('by-instrument', 'instrumentId');
+          readings.createIndex('by-file', 'sourceFileId');
+          const declarations = db.createObjectStore('declarations', { keyPath: 'declarationId' });
+          declarations.createIndex('by-point-day', 'day');
+          const recalc = db.createObjectStore('recalc', { keyPath: 'candidateId' });
+          recalc.createIndex('by-declaration', 'declarationId');
+          recalc.createIndex('by-point-day', 'day');
+          db.createObjectStore('audits', { keyPath: 'auditId' });
+        }
+        if (oldVersion < 2) {
+          // 事件调查：登记簿（版本化）、事件、候选评估、处置板、交付
+          const invRegistry = db.createObjectStore('invRegistry', { keyPath: 'recordId' });
+          invRegistry.createIndex('by-kind', 'kind');
+          db.createObjectStore('invEvents', { keyPath: 'eventId' });
+          const invCandidates = db.createObjectStore('invCandidates', { keyPath: 'candidateId' });
+          invCandidates.createIndex('by-event', 'eventId');
+          const invInvestigations = db.createObjectStore('invInvestigations', { keyPath: 'investigationId' });
+          invInvestigations.createIndex('by-event', 'eventId');
+          const invDeliveries = db.createObjectStore('invDeliveries', { keyPath: 'deliveryId' });
+          invDeliveries.createIndex('by-event', 'eventId');
+        }
       },
       blocked() {
         console.warn('IndexedDB 升级被其他标签页阻塞');
@@ -135,6 +169,11 @@ export async function clearAll(): Promise<void> {
     'declarations',
     'recalc',
     'audits',
+    'invRegistry',
+    'invEvents',
+    'invCandidates',
+    'invInvestigations',
+    'invDeliveries',
     'meta',
   ] as const;
   const tx = db.transaction(names, 'readwrite');
@@ -309,4 +348,112 @@ export async function intakeFiles(): Promise<IntakeFile[]> {
 export async function currentSchema(): Promise<number> {
   const db = await getDb();
   return db.version;
+}
+
+/* ---------------- 事件调查：登记簿 / 事件 / 候选 / 处置板 / 交付 ---------------- */
+
+export async function putRegistryRecords(records: RegistryRecordWrapper[]): Promise<void> {
+  if (records.length === 0) return;
+  const db = await getDb();
+  const tx = db.transaction('invRegistry', 'readwrite');
+  for (const r of records) await tx.store.put(r);
+  await tx.done;
+}
+
+export async function allRegistryRecords(): Promise<RegistryRecordWrapper[]> {
+  const db = await getDb();
+  return db.getAll('invRegistry');
+}
+
+/** 把登记簿记录还原为 InvestigationRegistry（保留全部版本，含已撤销） */
+export function registryFromRecords(records: RegistryRecordWrapper[]): InvestigationRegistry {
+  const registry: InvestigationRegistry = { sources: [], rainfall: [], pumpSwitches: [], selfReports: [], eventProfiles: [] };
+  for (const r of records) {
+    if (r.kind === 'SOURCE') registry.sources.push(r.record as InvestigationRegistry['sources'][number]);
+    else if (r.kind === 'RAINFALL') registry.rainfall.push(r.record as InvestigationRegistry['rainfall'][number]);
+    else if (r.kind === 'PUMP_SWITCH') registry.pumpSwitches.push(r.record as InvestigationRegistry['pumpSwitches'][number]);
+    else if (r.kind === 'SELF_REPORT') registry.selfReports.push(r.record as InvestigationRegistry['selfReports'][number]);
+    else if (r.kind === 'EVENT_PROFILE') registry.eventProfiles.push(r.record as InvestigationRegistry['eventProfiles'][number]);
+  }
+  return registry;
+}
+
+export function registryToRecords(registry: InvestigationRegistry): RegistryRecordWrapper[] {
+  const out: RegistryRecordWrapper[] = [];
+  for (const s of registry.sources) out.push({ recordId: s.recordId, kind: 'SOURCE', record: s });
+  for (const r of registry.rainfall) out.push({ recordId: r.recordId, kind: 'RAINFALL', record: r });
+  for (const p of registry.pumpSwitches) out.push({ recordId: p.recordId, kind: 'PUMP_SWITCH', record: p });
+  for (const b of registry.selfReports) out.push({ recordId: b.recordId, kind: 'SELF_REPORT', record: b });
+  for (const e of registry.eventProfiles) out.push({ recordId: e.recordId, kind: 'EVENT_PROFILE', record: e });
+  return out;
+}
+
+export async function saveEvent(event: OutfallEvent): Promise<void> {
+  const db = await getDb();
+  await db.put('invEvents', event);
+}
+
+export async function getEvent(eventId: string): Promise<OutfallEvent | undefined> {
+  const db = await getDb();
+  return db.get('invEvents', eventId);
+}
+
+export async function listEvents(): Promise<OutfallEvent[]> {
+  const db = await getDb();
+  const all = await db.getAll('invEvents');
+  return all.sort((a, b) => b.computedAt - a.computedAt);
+}
+
+export async function saveCandidates(assessments: CandidateAssessment[]): Promise<void> {
+  if (assessments.length === 0) return;
+  const db = await getDb();
+  const tx = db.transaction('invCandidates', 'readwrite');
+  for (const a of assessments) await tx.store.put(a);
+  await tx.done;
+}
+
+export async function listCandidates(eventId: string): Promise<CandidateAssessment[]> {
+  const db = await getDb();
+  const all = await db.getAllFromIndex('invCandidates', 'by-event', eventId);
+  return all.sort((a, b) => b.computedAt - a.computedAt);
+}
+
+export async function saveInvestigation(investigation: Investigation): Promise<void> {
+  const db = await getDb();
+  await db.put('invInvestigations', investigation);
+}
+
+export async function listInvestigations(eventId?: string): Promise<Investigation[]> {
+  const db = await getDb();
+  if (eventId) {
+    const all = await db.getAllFromIndex('invInvestigations', 'by-event', eventId);
+    return all.sort((a, b) => a.createdAt - b.createdAt);
+  }
+  const all = await db.getAll('invInvestigations');
+  return all.sort((a, b) => a.createdAt - b.createdAt);
+}
+
+export async function saveDelivery(delivery: Delivery): Promise<void> {
+  const db = await getDb();
+  const tx = db.transaction(['invDeliveries', 'audits'], 'readwrite');
+  await tx.objectStore('invDeliveries').put(delivery);
+  await tx.objectStore('audits').put({
+    auditId: `audit-${delivery.createdAt}-${Math.random().toString(36).slice(2, 8)}`,
+    at: delivery.createdAt,
+    actor: delivery.createdBy,
+    action: 'PUBLISH_DELIVERY',
+    detail: `发布${delivery.route === 'SET' ? '集合' : '排序'}交付 ${delivery.deliveryId}（仅调查优先级，非责任结论），内容哈希 ${delivery.contentHash.slice(0, 16)}…`,
+    refIds: [delivery.deliveryId, delivery.eventId],
+  });
+  await tx.done;
+}
+
+export async function listDeliveries(eventId?: string): Promise<Delivery[]> {
+  const db = await getDb();
+  if (eventId) {
+    const all = await db.getAllFromIndex('invDeliveries', 'by-event', eventId);
+    return all.sort((a, b) => b.createdAt - a.createdAt);
+  }
+  const all = await db.getAll('invDeliveries');
+  return all.sort((a, b) => b.createdAt - a.createdAt);
 }

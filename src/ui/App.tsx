@@ -11,6 +11,12 @@ import { IntakePage } from './pages/IntakePage';
 import { InstrumentPage } from './pages/InstrumentPage';
 import { MethodPage } from './pages/MethodPage';
 import { MonthPage } from './pages/MonthPage';
+import { RegistryPage } from './pages/RegistryPage';
+import { EventPage } from './pages/EventPage';
+import { RoutesPage } from './pages/RoutesPage';
+import { BoardPage } from './pages/BoardPage';
+import { DeliveryPage } from './pages/DeliveryPage';
+import { useInvestigate } from './investigate/useInvestigate';
 import { METHOD_LABEL, fmtNum } from './format';
 
 const NAV: { key: string; label: string; group: string }[] = [
@@ -20,6 +26,11 @@ const NAV: { key: string; label: string; group: string }[] = [
   { key: 'quality', label: '覆盖与资格', group: '合规' },
   { key: 'month', label: '月度汇总', group: '合规' },
   { key: 'recalc', label: '复算候选', group: '合规' },
+  { key: 'event', label: '事件与候选', group: '事件调查' },
+  { key: 'registry', label: '来源登记簿', group: '事件调查' },
+  { key: 'routes', label: '证据路线', group: '事件调查' },
+  { key: 'board', label: '调查处置板', group: '事件调查' },
+  { key: 'delivery', label: '结论交付', group: '事件调查' },
   { key: 'verify', label: '样例核验', group: '质量保证' },
   { key: 'intake', label: '接入账', group: '资料' },
   { key: 'instruments', label: '设备履历', group: '资料' },
@@ -28,6 +39,7 @@ const NAV: { key: string; label: string; group: string }[] = [
 
 export function App() {
   const { state, actions } = useAppState();
+  const { inv, invActions, derived } = useInvestigate(state, actions);
   const [page, setPage] = useState<string>('overview');
   const [showSettings, setShowSettings] = useState(false);
 
@@ -36,6 +48,7 @@ export function App() {
   }, [state.dataset.points.length, state.loading]);
 
   const groups = [...new Set(NAV.map((n) => n.group))];
+  const openInvestigations = inv.investigations.filter((i) => i.status === 'PENDING' || i.status === 'SAMPLING').length;
 
   return (
     <div className="app">
@@ -64,6 +77,7 @@ export function App() {
                 {n.key === 'quality' && state.declarations.length > 0 && (
                   <span className="nav-badge">{state.declarations.length}</span>
                 )}
+                {n.key === 'board' && openInvestigations > 0 && <span className="nav-badge">{openInvestigations}</span>}
               </button>
             ))}
           </div>
@@ -160,6 +174,25 @@ export function App() {
           {state.ready && page === 'instruments' && <InstrumentPage state={state} actions={actions} />}
           {state.ready && page === 'method' && <MethodPage state={state} />}
           {state.ready && page === 'month' && <MonthPage state={state} actions={actions} />}
+          {state.ready && page === 'event' && (
+            <EventPage state={state} actions={actions} inv={inv} invActions={invActions} current={derived.current} />
+          )}
+          {state.ready && page === 'registry' && <RegistryPage state={state} actions={actions} inv={inv} invActions={invActions} />}
+          {state.ready && page === 'routes' && (
+            <RoutesPage
+              state={state}
+              actions={actions}
+              inv={inv}
+              invActions={invActions}
+              current={derived.current}
+              setResult={derived.setResult}
+              rankResult={derived.rankResult}
+            />
+          )}
+          {state.ready && page === 'board' && (
+            <BoardPage state={state} actions={actions} inv={inv} invActions={invActions} current={derived.current} />
+          )}
+          {state.ready && page === 'delivery' && <DeliveryPage state={state} actions={actions} inv={inv} />}
         </div>
       </main>
 

@@ -1,0 +1,2 @@
+batch_id,source_id,version,trust_level,received_at,supersedes,claim_kind,claim_from,claim_to,flow_lo_m3h,flow_hi_m3h,text,revoked,note
+SR-A-v2,SRC-A,2,B,2026-11-21T09:05:00+08:00,SR-A-v1,DISCHARGE,2026-11-20T14:02:00+08:00,2026-11-20T14:31:00+08:00,32,38,抄表更正：14:02–14:31 实际排放约 35 m³/h（原零读数为抄表遗漏）,false,更正批次，撤销 SR-A-v1

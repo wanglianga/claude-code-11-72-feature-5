@@ -104,6 +104,27 @@ export function MethodPage({ state }: { state: AppState }) {
         </div>
       </div>
 
+      <div className="card">
+        <div className="card-head">
+          <h2>事件调查口径（短时高氨氮）</h2>
+          <span className="sub">只输出调查优先级，不输出责任结论</span>
+        </div>
+        <div className="card-pad grid cols-2">
+          <div className="stack small">
+            <div>事件窗口取自本复核台氨氮阈值穿越区间；事件指纹 = 事件窗口均值 − 事件前 1 小时基线（隔 10 分钟），区间半宽按仪表相对不确定度合成（k=2）；电导率/pH 来自事件加密监测记录。</div>
+            <div>水力召回：排放窗口 = [事件起点 − 传播上限, 事件终点 − 传播下限]；泵站中途切换按排放时刻所处体制分别倒推并裁剪，无可行时刻的体制如实标注。</div>
+            <div>证据组合：时间带相容性为门槛（不计分）；特征维度按观测增量与登记包络重叠比判定（≥0.8 相容 ×1.0，≥0.15 弱相容 ×0.5，&lt;0.15 反证 ×−0.75）；缺测只产生缺失惩罚。</div>
+            <div>自报贡献乘可信系数（A=1.0、B=0.8、C=0.55）；自报否认是反证；雨量维度只对雨污合流溢流计分。</div>
+          </div>
+          <div className="stack small">
+            <div>集合路线：只发布满足预先声明门槛（独立支持数、反证上限、完整度下限）的候选集合；同一自报批次的流量与自报维度不重复计独立数；暴雨期间无独立反证的候选保留并列。</div>
+            <div>排序路线：按 Σ贡献降序；前两名分差 &lt; 0.05 或首位完整度 &lt; 0.6 时输出「不可判定」而非强行排序；必须展示对自报更正与雨量误差界的敏感性。</div>
+            <div>版本纪律：自报更正按版本撤销旧批次与旧评分；拓扑修订不改写已关闭调查（关闭快照冻结）；交付内容哈希 = SHA-256（候选证据 + 门槛 + 登记簿版本），发布后不可改写。</div>
+            <div>两条路线的全部输出仅为下一步采样与现场核查的优先级，不构成、也不得被解释为污染来源的责任结论。</div>
+          </div>
+        </div>
+      </div>
+
       <div className="card card-pad">
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <div className="small muted">

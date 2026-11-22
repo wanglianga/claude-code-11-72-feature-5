@@ -18,6 +18,11 @@ const KIND_LABEL: Record<string, string> = {
   STATE_LOG: '状态台账',
   READINGS: '读数批次',
   LATE_BATCH: '迟到补录',
+  SOURCE_REGISTRY: '来源登记簿',
+  RAINFALL: '雨量序列',
+  PUMP_SWITCH: '泵站切换',
+  SELF_REPORT: '自报批次',
+  EVENT_PROFILE: '事件加密监测',
 };
 
 export function IntakePage({ state, actions }: Props) {

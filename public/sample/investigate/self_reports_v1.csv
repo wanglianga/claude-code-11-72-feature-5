@@ -1,0 +1,4 @@
+batch_id,source_id,version,trust_level,received_at,supersedes,claim_kind,claim_from,claim_to,flow_lo_m3h,flow_hi_m3h,text,revoked,note
+SR-A-v1,SRC-A,1,B,2026-11-20T18:30:00+08:00,,NO_DISCHARGE,2026-11-20T00:00:00+08:00,2026-11-21T00:00:00+08:00,,,全天未排放（流量计零读数）,false,宏成化工自报，后被 v2 更正
+SR-B-v1,SRC-B,1,B,2026-11-20T19:10:00+08:00,,OVERFLOW,2026-11-20T14:05:00+08:00,2026-11-20T14:55:00+08:00,380,520,降雨溢流，液位计记录溢流时段 14:05–14:55,false,市政排水公司溢流记录
+SR-C-v1,SRC-C,1,A,2026-11-20T17:00:00+08:00,,PUMP_OFF,2026-11-20T14:00:00+08:00,2026-11-20T14:45:00+08:00,,,反硝化回流泵停运检修（工单 WO-120-007）,false,厂内运行日志（台账级）

@@ -1,0 +1,2 @@
+source_id,kind,name,version,trust_level,registered_at,supersedes,sewer_id,chainage_m,travel_min_s,travel_max_s,allowed_kind,allowed_from,allowed_to,rain_threshold_mmh,env_nh3n_lo,env_nh3n_hi,env_cod_lo,env_cod_hi,env_cond_lo,env_cond_hi,env_ph_lo,env_ph_hi,flow_lo_m3h,flow_hi_m3h,revoked,note
+SRC-B,CSO_OVERFLOW,城西雨污合流溢流口,2,B,2026-11-21T10:30:00+08:00,SRC-B@v1,SW-CSO-07,1100,360,600,RAIN_TRIGGERED,,,18,2,6.5,10,45,,,-0.5,-0.05,300,600,false,里程复核更正：接入点里程 950→1100 m，常规传播时间 300–540→360–600 s。

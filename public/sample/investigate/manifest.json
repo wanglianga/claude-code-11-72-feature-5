@@ -1,0 +1,107 @@
+{
+  "name": "暴雨高氨氮事件调查样例（虚构）",
+  "description": "2026-11-20 暴雨期间 CC-E01 排口 14:32–14:41 短时高氨氮事件。两条时间相近支管（工业支管 / 雨污合流溢流，其中溢流口缺电导率登记）与厂内回流候选；泵站 14:10 中途切换；自报批次 v2 更正撤销 v1；拓扑修订更正溢流口里程。",
+  "generatedAt": "2026-11-21T12:00:00+08:00",
+  "timezone": "Asia/Shanghai",
+  "event": {
+    "pointCode": "CC-E01",
+    "day": "2026-11-20",
+    "pollutant": "NH3N",
+    "expectWindowLocal": "14:32–14:41",
+    "storm": true,
+    "scenario": [
+      "暴雨 13:05–16:00，峰值雨强 42 mm/h（14:10），溢流触发阈值 18 mm/h，雨量误差 ±15%",
+      "14:32–14:41 排口氨氮 3.6 → 9.2 mg/L（限值 5），电导率 +75 µS/cm，pH −0.23",
+      "SRC-A 工业支管倒推窗口 14:22–14:35；SRC-B 溢流口经泵站切换后体制倒推 14:10–14:27",
+      "SRC-B 登记缺电导率（缺测惩罚）；SRC-C 回流泵 14:00–14:45 停运被排除",
+      "自报 v1 否认排放 → v2 更正承认 14:02–14:31 排放，旧评分按版本撤销"
+    ]
+  },
+  "setRoute": {
+    "minIndependentSupports": 3,
+    "maxStrongCounters": 0,
+    "minCompleteness": 0.6,
+    "declaredAt": "2026-11-20T08:00:00+08:00",
+    "declaredBy": "调度中心",
+    "note": "预先声明：独立支持 ≥3（相容=1、弱相容=0.5）、独立反证 =0、完整度 ≥0.6 方入集合；暴雨期间无独立反证的候选保留并列。"
+  },
+  "rankRoute": {
+    "marginThreshold": 0.05,
+    "completenessFloor": 0.6,
+    "note": "前两名分差 <0.05 或首位完整度 <0.6 时输出不可判定；须展示对自报更正与雨量误差 ±15% 的敏感性。"
+  },
+  "baseFiles": [
+    {
+      "fileName": "readings_CC-E01_2026-11-20.csv",
+      "kind": "READINGS",
+      "receivedAt": "2026-11-21T06:30:00+08:00",
+      "rowCount": 6480,
+      "sha256": "26e890a2a8bb2ff2dbf30316832dde9166451a85e7e25fbfe07270152f2f5880",
+      "note": "暴雨日排口读数（COD/氨氮/流量，10 s），含 14:32–14:41 高氨氮冲击"
+    },
+    {
+      "fileName": "states_ext_2026-11-20.csv",
+      "kind": "STATE_LOG",
+      "receivedAt": "2026-11-21T06:30:00+08:00",
+      "rowCount": 3,
+      "sha256": "1c28966d5c784712945100efde0725e984eb9de1339f6100fe7a74f429331c9a",
+      "note": "暴雨日状态台账延续（OK），衔接基础台账有效期"
+    },
+    {
+      "fileName": "sources.csv",
+      "kind": "SOURCE_REGISTRY",
+      "receivedAt": "2026-11-19T09:00:00+08:00",
+      "rowCount": 3,
+      "sha256": "e315bb51ea4b22dc4b4f62cbb2e477017612c643866f346fd924a9fa4eeac1f7",
+      "note": "来源登记簿 v1：接入位置、允许排放时段、排口等效增量包络、可信等级"
+    },
+    {
+      "fileName": "rainfall_RG-1_2026-11-20.csv",
+      "kind": "RAINFALL",
+      "receivedAt": "2026-11-20T18:30:00+08:00",
+      "rowCount": 72,
+      "sha256": "20c80ff5d58e32f7b99d73b6106b1a22d56365ba37965312d12ace8ab7531eb4",
+      "note": "城西雨量站 5 分钟雨量，峰值 42 mm/h（14:10），误差界 ±15%"
+    },
+    {
+      "fileName": "pump_switches.csv",
+      "kind": "PUMP_SWITCH",
+      "receivedAt": "2026-11-20T15:00:00+08:00",
+      "rowCount": 1,
+      "sha256": "03a52a1a2c75486178603d64713912fb75aee896eed7742bf6f80fb39803592c",
+      "note": "泵站切换记录：14:10 直排→截流，影响 SW-CSO-07 传播时间"
+    },
+    {
+      "fileName": "self_reports_v1.csv",
+      "kind": "SELF_REPORT",
+      "receivedAt": "2026-11-20T19:10:00+08:00",
+      "rowCount": 3,
+      "sha256": "2cdfc3a285907ffd601621bcd43e2cf658877640cef6b73ecff07a82d1d14742",
+      "note": "自报批次 v1：化工否认排放；市政溢流记录；厂内回流泵停运"
+    },
+    {
+      "fileName": "event_profile_CC-E01.csv",
+      "kind": "EVENT_PROFILE",
+      "receivedAt": "2026-11-20T16:30:00+08:00",
+      "rowCount": 60,
+      "sha256": "8bcf5f092f314b72147ec141fa413348019aefb020f7ab10f12ba3da20779879",
+      "note": "移动监测车 14:00–15:00 加密监测（电导率/pH，1 min）"
+    }
+  ],
+  "correctionFile": {
+    "fileName": "self_reports_v2_correction.csv",
+    "kind": "SELF_REPORT",
+    "receivedAt": "2026-11-21T09:05:00+08:00",
+    "rowCount": 1,
+    "sha256": "1aca8cc79418bf671ff4d38e3d2775d1fa1d728ee6b456635451f0bfdbb666b3",
+    "note": "自报更正批次 SR-A-v2：承认 14:02–14:31 排放，撤销 SR-A-v1 的否认"
+  },
+  "topologyFile": {
+    "fileName": "sources_v2_topology.csv",
+    "kind": "SOURCE_REGISTRY",
+    "receivedAt": "2026-11-21T10:30:00+08:00",
+    "rowCount": 1,
+    "sha256": "381249a4064e7611c37eeacb7bb02da2b0683ee4db197d02f461e6fcd4eab938",
+    "note": "拓扑修订：SRC-B 接入里程 950→1100 m（v2），不改写已关闭调查"
+  }
+}
